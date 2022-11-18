@@ -32,7 +32,7 @@ describe('backend-express-template routes', () => {
     expect(res.status).toEqual(200);
   });
 
-  it('DELETE /users/f1/sessions should sign out a user', async () => {
+  it('DELETE /users/sessions should sign out a user', async () => {
     await UserService.create({ ...testUser });
     const agent = request.agent(app);
     await agent.post('/api/v1/users/sessions').send({
