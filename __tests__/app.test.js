@@ -43,6 +43,27 @@ describe('backend-express-template routes', () => {
     expect(res.status).toBe(204);
   });
 
+  it('POST  ', async () => {
+    const agent = request(app);
+    await agent.post('/api/v1/users').send({
+      email: 'user@email.com',
+      password: 'password12345',
+    });
+
+    const testSecret = {
+      title: 'secret time yo',
+      description: 'winning lotto numbers are 6, 12, 25, 27, 32, 46',
+    };
+
+    const res = await agent.post('/api/v1/secrets').send(testSecret);
+
+    expect(res.body).toEqual({
+      id: expect.any(String),
+      createdAt: expect.any(String),
+      ...testSecret,
+    });
+  });
+
   afterAll(() => {
     pool.end();
   });
