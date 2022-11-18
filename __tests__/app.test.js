@@ -3,6 +3,7 @@ const setup = require('../data/setup');
 const request = require('supertest');
 const app = require('../lib/app');
 const UserService = require('../lib/services/UserService');
+const { agent } = require('supertest');
 
 const testUser = {
   email: 'user@email.com',
@@ -29,6 +30,17 @@ describe('backend-express-template routes', () => {
       password: 'password12345',
     });
     expect(res.status).toEqual(200);
+  });
+
+  it('DELETE /users/f1/sessions should sign out a user', async () => {
+    await UserService.create({ ...testUser });
+    const agent = request.agent(app);
+    await agent.post('/api/v1/users/sessions').send({
+      email: 'user@email.com',
+      password: 'password12345',
+    });
+    const res = await agent.delete('/api/v1/users/sessions');
+    expect(res.status).toBe(204);
   });
 
   afterAll(() => {
