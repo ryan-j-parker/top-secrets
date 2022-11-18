@@ -4,16 +4,17 @@ const request = require('supertest');
 const app = require('../lib/app');
 const UserService = require('../lib/services/UserService');
 
+const testUser = {
+  email: 'user@email.com',
+  password: 'password12345',
+};
+
 describe('backend-express-template routes', () => {
   beforeEach(() => {
     return setup(pool);
   });
-  
+
   it('POST /users should add a new user', async () => {
-    const testUser = {
-      email: 'user@email.com',
-      password: 'password12345',
-    };
     const res = await request(app).post('/api/v1/users').send(testUser);
     expect(res.body).toEqual({
       id: expect.any(String),
@@ -22,14 +23,12 @@ describe('backend-express-template routes', () => {
   });
 
   it('POST /users/sessions should sign in a user', async () => {
-    const userData = {
+    await request(app).post('/api/v1/users').send(testUser);
+    const res = await request(app).post('/api/v1/users/sessions').send({
       email: 'user@email.com',
-      password: 'passwored12345'
-    };
-    const testUser = await UserService.create(userData);
-    const agent = request.agent(app);
-    const res = await (await agent.post('/api/v1/users/sessions')).send(userData);
-    expect(res.body).toEqual({ message: 'Signed in successfully', testUser });
+      password: 'password12345',
+    });
+    expect(res.status).toEqual(200);
   });
 
   afterAll(() => {
