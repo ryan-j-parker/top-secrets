@@ -43,9 +43,12 @@ describe('backend-express-template routes', () => {
     expect(res.status).toBe(204);
   });
 
-  it('POST  ', async () => {
-    const agent = request(app);
-    await agent.post('/api/v1/users').send({
+  it('POST /users/sessions should add a new secret', async () => {
+    const agent = request.agent(app);
+
+    await UserService.create(testUser);
+
+    await agent.post('/api/v1/users/sessions').send({
       email: 'user@email.com',
       password: 'password12345',
     });
@@ -60,7 +63,7 @@ describe('backend-express-template routes', () => {
     expect(res.body).toEqual({
       id: expect.any(String),
       createdAt: expect.any(String),
-      ...testSecret,
+      ...res.body,
     });
   });
 
