@@ -3,7 +3,6 @@ const setup = require('../data/setup');
 const request = require('supertest');
 const app = require('../lib/app');
 const UserService = require('../lib/services/UserService');
-const { agent } = require('supertest');
 
 const testUser = {
   email: 'user@email.com',
@@ -40,50 +39,38 @@ describe('backend-express-template routes', () => {
       password: 'password12345',
     });
     const res = await agent.delete('/api/v1/users/sessions');
-    expect(res.status).toBe(204);
+    expect(res.status).toBe(200);
+    expect(res.body).toMatchInlineSnapshot(`
+      Object {
+        "message": "Signed out successfully!",
+        "success": true,
+      }
+    `);
   });
 
-  it('POST should add a new secret', async () => {
+  it('GET should get a list of secrets for authenticated users', async () => {
+
+    const test = await request(app).get('/api/v1/secrets');
+    expect(test.status).toBe(401);
+
     const agent = request.agent(app);
 
-    await UserService.create(testUser);
+    await agent.post('/api/v1/users').send(testUser);
 
     await agent.post('/api/v1/users/sessions').send({
       email: 'user@email.com',
       password: 'password12345',
     });
 
-    const testSecret = {
-      title: 'secret time yo',
-      description: 'winning lotto numbers are 6, 12, 25, 27, 32, 46',
-    };
-
-    const res = await agent.post('/api/v1/secrets').send(testSecret);
-
-    expect(res.body).toEqual({
-      id: expect.any(String),
-      createdAt: expect.any(String),
-      ...res.body,
-    });
-  });
-
-  it('GET should get a list of secrets for authenticated users', async () => {
-    const agent = request.agent(app);
-
-    await agent.post('/api/v1/users').send(testUser);
-
-    await agent.post('/api/v1/users/sessions').send({
-      email: testUser.email,
-      password: testUser.password    
-    });
-
-    const res = await agent.get('/api/v1');
-    expect(res.body[0]).toEqual({
-      id: expect.any(String),
-      title: expect.any(String),
-      description: expect.any(String),
-      createdAt: expect.any(String)
-    });
+    const res = await agent.get('/api/v1/secrets');
+    expect(res.body).toEqual([
+      {
+        id: expect.any(String),
+        title: expect.any(String),
+        description: expect.any(String),
+        createdAt: expect.any(String),
+      },
+    ]);
   });
 
   afterAll(() => {
