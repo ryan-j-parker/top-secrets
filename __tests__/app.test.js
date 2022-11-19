@@ -43,7 +43,7 @@ describe('backend-express-template routes', () => {
     expect(res.status).toBe(204);
   });
 
-  it('POST /users/sessions should add a new secret', async () => {
+  it('POST should add a new secret', async () => {
     const agent = request.agent(app);
 
     await UserService.create(testUser);
@@ -64,6 +64,25 @@ describe('backend-express-template routes', () => {
       id: expect.any(String),
       createdAt: expect.any(String),
       ...res.body,
+    });
+  });
+
+  it('GET should get a list of secrets for authenticated users', async () => {
+    const agent = request.agent(app);
+
+    await agent.post('/api/v1/users').send(testUser);
+
+    await agent.post('/api/v1/users/sessions').send({
+      email: testUser.email,
+      password: testUser.password    
+    });
+
+    const res = await agent.get('/api/v1');
+    expect(res.body[0]).toEqual({
+      id: expect.any(String),
+      title: expect.any(String),
+      description: expect.any(String),
+      createdAt: expect.any(String)
     });
   });
 
